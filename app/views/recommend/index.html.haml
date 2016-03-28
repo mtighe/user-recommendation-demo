@@ -1,0 +1,33 @@
+.header
+  .header__title 500px User Recommendation
+  = form_tag "/", method: "get", enforce_utf8: false, class: "header__form" do
+    = text_field_tag "engine_ip", nil, class: "header__form__ip", placeholder: "Prediction IP"
+    = text_field_tag "username", value = @username, class: "header__form__username", placeholder: "500px Username"
+    = radio_button_tag :recommendation_type, 'similar', checked = @recommendation_type == 'similar'
+    = label_tag :recommendation_type_similar, 'Similar'
+    = radio_button_tag :recommendation_type, 'for_user', checked = @recommendation_type == 'for_user'
+    = label_tag :recommendation_type_for_user, 'For User'
+    = submit_tag "Recommend!", name: nil, class: "header__form__submit"
+
+.content
+  - unless @user.nil?
+    .target_user
+      %a.target_user__avatar{href: @user[:path], target: '_blank'}
+        %img.target_user__avatar_img{src: @user[:avatar]}
+        .target_user__name
+          - if @recommendation_type == "for_user"
+            Recommendations for
+          - else
+            Users similar to
+          = @user[:fullname]
+
+  .recommendations
+    - @users.each do |user|
+      .recommended_user
+        %a.recommended_user__avatar{href: user[:path], target: '_blank'}
+          %img.recommended_user__avatar_img{src: user[:avatar]}
+          .recommended_user__name= user[:fullname]
+        .recommended_user__gallery
+          - user[:photos].each do |photo|
+            %a{href: photo[:link], target: '_blank'}
+              %img.recommended_user__gallery_photo{src: photo[:img]}
