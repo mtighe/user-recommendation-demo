@@ -2,7 +2,7 @@
   .header__title 500px User Recommendation
   = form_tag "/", method: "get", enforce_utf8: false, class: "header__form" do
     = text_field_tag "engine_ip", nil, class: "header__form__ip", placeholder: "Prediction IP"
-    = text_field_tag "username", value = @username, class: "header__form__username", placeholder: "500px Username"
+    = text_field_tag "username", value = @username, class: "header__form__username", placeholder: "500px Username(s)"
     = radio_button_tag :recommendation_type, 'similar', checked = @recommendation_type == 'similar'
     = label_tag :recommendation_type_similar, 'Similar'
     = radio_button_tag :recommendation_type, 'for_user', checked = @recommendation_type == 'for_user'

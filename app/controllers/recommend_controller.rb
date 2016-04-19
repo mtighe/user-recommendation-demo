@@ -7,18 +7,29 @@ class RecommendController < ApplicationController
     @recommendation_type ||= "similar"
 
     unless @username.nil?
-      # fetch user from 500px
-      user_params = {
-        username: @username
-      }
+      usernames = @username.split(',')
 
-      userResponse = JSON.parse(F00px.get("users/show?#{user_params.to_query}").body)["user"]
-      @user = {
-        id: userResponse["id"],
-        fullname: userResponse["fullname"],
-        avatar: userResponse["avatars"]["large"]["https"],
-        path: "https://500px.com/#{userResponse['username']}"
-      }
+      @users = []
+      usernames.each do |username|
+        # fetch user from 500px
+        user_params = {
+          username: username
+        }
+
+        userResponse = JSON.parse(F00px.get("users/show?#{user_params.to_query}").body)["user"]
+
+        if userResponse.nil?
+          puts "Could not find user #{username}!"
+        else
+          user = {
+            id: userResponse["id"],
+            fullname: userResponse["fullname"],
+            avatar: userResponse["avatars"]["large"]["https"],
+            path: "https://500px.com/#{userResponse['username']}"
+          }
+          @users << user
+        end
+      end
 
       users_for_rec = nil
       if @recommendation_type == "for_user"
@@ -31,13 +42,15 @@ class RecommendController < ApplicationController
           rpp: 100,
           page: page
         }
-        friendsResponse = JSON.parse(F00px.get("users/#{@user[:id]}/friends?#{friends_params.to_query}").body)
+        friendsResponse = JSON.parse(F00px.get("users/#{@users[0][:id]}/friends?#{friends_params.to_query}").body)
 
         users_for_rec = friendsResponse["friends"].map { |friend| friend["id"] }
+        users_for_rec.flatten!
       else
         # "similar"
         # recommend similar to this user
-        users_for_rec = [@user[:id]]
+        users_for_rec = [@users.map { |u| u[:id] }]
+        users_for_rec.flatten!
       end
 
       user_ids = get_recommendation(users_for_rec)
@@ -52,8 +65,8 @@ class RecommendController < ApplicationController
   private
 
   def get_recommendation(ids)
-    client = PredictionIO::EngineClient.new(ENV['PIO_ENGINE_URL'] || "http://54.161.232.23:8000")
-    response = client.send_query(items: ids, num: 20)["itemScores"]
+    client = PredictionIO::EngineClient.new(ENV['PIO_ENGINE_URL'])
+    response = client.send_query(items: ids, num: 100)["itemScores"]
 
     users = response.map { |item| item["item"].to_i }
     users

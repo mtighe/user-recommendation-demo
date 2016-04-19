@@ -25,6 +25,10 @@ body {
     position: absolute;
     right: 10px;
 
+    &__username {
+      width: 400px;
+    }
+
     &__submit {
       background-color: #0099e5;
       color: #fff;
