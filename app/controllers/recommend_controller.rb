@@ -2,7 +2,6 @@ class RecommendController < ApplicationController
 
   def index
     @username = params["username"]
-    engine_ip = params["engine_ip"]
     @recommendation_type = params[:recommendation_type]
     @recommendation_type ||= "similar"
 
@@ -92,7 +91,8 @@ class RecommendController < ApplicationController
         feature: "user",
         user_id: user[:id],
         rpp: 10,
-        image_size: 32
+        image_size: 32,
+        sort: 'highest_rating'
       }
       photosResponse = JSON.parse(F00px.get("photos?#{photo_params.to_query}").body)["photos"]
       user[:photos] = photosResponse.map do |photo|
