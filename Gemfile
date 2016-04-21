@@ -28,6 +28,8 @@ gem 'haml'
 gem 'f00px'
 gem 'predictionio'
 
+gem 'puma'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
