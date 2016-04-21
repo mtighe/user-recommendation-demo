@@ -10,15 +10,20 @@ class RecommendController < ApplicationController
 
       @users = []
       usernames.each do |username|
+        username.strip!
+
         # fetch user from 500px
         user_params = {
           username: username
         }
 
-        userResponse = JSON.parse(F00px.get("users/show?#{user_params.to_query}").body)["user"]
+        userResponse = F00px.get("users/show?#{user_params.to_query}")
+        userResponse = JSON.parse(userResponse.body)
+        userResponse = userResponse["user"]
+
 
         if userResponse.nil?
-          puts "Could not find user #{username}!"
+          puts "Could not find user #{username}"
         else
           user = {
             id: userResponse["id"],
@@ -58,7 +63,11 @@ class RecommendController < ApplicationController
       user_ids = [1, 126704]
     end
 
-    @users = get_users(user_ids)
+    if user_ids.empty?
+      @users = []
+    else
+      @users = get_users(user_ids)
+    end
   end
 
   private
@@ -76,7 +85,9 @@ class RecommendController < ApplicationController
       ids: ids,
       respond_with: "array"
     }
-    usersResponse = JSON.parse(F00px.get("users?#{user_params.to_query}").body)["users"]
+
+    usersResponse = F00px.get("users?#{user_params.to_query}")
+    usersResponse = JSON.parse(usersResponse.body)["users"]
     users = usersResponse.map do |user|
       {
         id: user["id"],
